@@ -1,8 +1,12 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Literal
+
+import numpy as np
 from pepeline import cvt_color, CvtType
 from ._sharp_class import Canny, DiapasonBlack, DiapasonWhite, ColorLevels
 from reline.static import Node, NodeOptions, ImageFile
+
+CannyType = Literal['invert', 'normal']
 
 
 @dataclass(frozen=True)
@@ -13,6 +17,7 @@ class SharpOptions(NodeOptions):
     diapason_white: Optional[int] = -1
     diapason_black: Optional[int] = -1
     canny: Optional[bool] = False
+    canny_type: Optional[CannyType] = 'normal'
 
 
 class SharpNode(Node[SharpOptions]):
@@ -26,7 +31,7 @@ class SharpNode(Node[SharpOptions]):
         if options.diapason_black >= 0:
             self.stack.append(DiapasonBlack(options.diapason_black))
         if options.canny:
-            self.stack.append(Canny())
+            self.stack.append(Canny(options.canny_type))
 
     def process(self, files: List[ImageFile]) -> List[ImageFile]:
         if len(self.stack) == 0:
@@ -39,3 +44,26 @@ class SharpNode(Node[SharpOptions]):
                 img_float = process.run(img_float)
             file.data = img_float
         return files
+
+    def single_process(self, file: ImageFile) -> ImageFile:
+        if len(self.stack) == 0:
+            return file
+
+        img_float = file.data.squeeze()
+        if img_float.ndim == 3:
+            img_float = cvt_color(img_float, CvtType.RGB2GrayBt2020)
+        for process in self.stack:
+            img_float = process.run(img_float)
+        file.data = img_float
+        return file
+
+    def video_process(self, file: np.ndarray) -> np.ndarray:
+        if len(self.stack) == 0:
+            return file
+
+        img_float = file.squeeze()
+        if img_float.ndim == 3:
+            img_float = cvt_color(img_float, CvtType.RGB2GrayBt2020)
+        for process in self.stack:
+            img_float = process.run(img_float)
+        return img_float
