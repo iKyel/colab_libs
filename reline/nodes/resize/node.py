@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-import numpy as np
 from chainner_ext import resize
 
 from reline.static import Node, NodeOptions, ImageFile
@@ -58,13 +57,3 @@ class ResizeNode(Node[ResizeOptions]):
             file.data = resize(file.data, (w, h), self.filter, self.options.gamma_correction).squeeze()
 
         return files
-
-    def single_process(self, file: ImageFile) -> ImageFile:
-        h, w = self.calculate_size(*file.data.shape[:2])
-        file.data = resize(file.data, (w, h), self.filter, self.options.gamma_correction).squeeze()
-        return file
-
-    def video_process(self, file: np.ndarray) -> np.ndarray:
-        h, w = self.calculate_size(*file.data.shape[:2])
-        file = resize(file, (w, h), self.filter, self.options.gamma_correction).squeeze()
-        return file

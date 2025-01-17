@@ -3,8 +3,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, List
 
-import numpy as np
-
 from .file import ImageFile
 
 
@@ -24,12 +22,4 @@ class Node(ABC, Generic[T]):
 
     @abstractmethod
     def process(self, files: List[ImageFile]) -> List[ImageFile]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def single_process(self, file: ImageFile) -> ImageFile:
-        raise NotImplementedError
-
-    @abstractmethod
-    def video_process(self, file: np.ndarray) -> np.ndarray:
         raise NotImplementedError

@@ -5,16 +5,11 @@ from pepeline import fast_color_level
 
 
 class Canny:
-    def __init__(self,canny_type):
-        if canny_type == "invert":
-            self.canny_value = 1.0
-        else:
-            self.canny_value = 0.0
-
-    def run(self, img_float: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def run(img_float: np.ndarray) -> np.ndarray:
         image = (img_float * 255).astype(np.uint8)
         edges = np.clip(255 - cv.Canny(image, 750, 800, apertureSize=3, L2gradient=False), 0, 1)
-        return np.where(edges, img_float, self.canny_value)
+        return np.where(edges, img_float, 0)
 
 
 class DiapasonWhite:

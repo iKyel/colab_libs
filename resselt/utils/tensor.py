@@ -1,4 +1,4 @@
-from enum import Enum
+import numpy
 import numpy as np
 import torch
 from torch import Tensor
@@ -7,12 +7,6 @@ from torch import Tensor
 def empty_cuda_cache():
     torch.cuda.empty_cache()
     torch.cuda.ipc_collect()
-
-
-class UpscaleDType(Enum):
-    F32 = torch.float32
-    BF16 = torch.bfloat16
-    F16 = torch.half
 
 
 def image2tensor(
@@ -41,12 +35,12 @@ def image2tensor(
 
 def tensor2image(
     value: list[torch.Tensor] | torch.Tensor,
-    out_type=np.float32,
+    out_type=numpy.float32,
 ) -> list[np.ndarray] | np.ndarray:
     def _to_ndarray(tensor: torch.Tensor) -> np.ndarray:
         tensor = tensor.squeeze(0).detach().cpu()
 
-        if tensor.dtype != torch.float32:
+        if tensor.dtype == torch.bfloat16:
             tensor = tensor.float()
 
         img = tensor.numpy().transpose(1, 2, 0)
